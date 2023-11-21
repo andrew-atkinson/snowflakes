@@ -1,7 +1,7 @@
-let flakes, font, textArr;
+let flakes, font, textArr, pName;
 
 function preload() {
-  font = loadFont("fonts/Pacifico-Regular.ttf")
+  font = loadFont("fonts/Pacifico-Regular.ttf");
 }
 
 function setup() {
@@ -9,29 +9,29 @@ function setup() {
   noStroke();
 
   let str = getURLParams();
-  let pName = str.name.replace(/%20/g, " ");
-
-  textArr = font.textToPoints(
-    pName,
-    200,
-    height / 2,
-    100,
-    { sampleFactor: .25 }
-  );
-
+  if (str.name) {
+    pName = str.name.replace(/%20/g, " ");
+    textArr = font.textToPoints(pName, 200, height / 2, 100, {
+      sampleFactor: 0.25,
+    });
+  }
 
   flakes = [];
   for (let i = 0; i < 180; i++) {
-    flakes.push(new Flake());
+    let flake = new Flake();
+    flake.pointsArr = flake.createPoints();
+    flakes.push(flake);
   }
 }
 
 function draw() {
   background(20);
-
   stroke(255);
   strokeWeight(1);
-  textArr.forEach(p => point(p.x, p.y));
+
+  if (textArr) {
+    textArr.forEach((p) => point(p.x, p.y));
+  }
 
   for (let i = 0; i < flakes.length; i++) {
     flakes[i].update();
@@ -39,15 +39,18 @@ function draw() {
   }
 }
 
-function Flake() {
-  this.x = random(width);
-  this.y = random(height);
-  this.a = random(PI);
-  this.spin = random(-0.02, 0.02) * 3;
-  this.size = random(10, 25);
+class Flake {
+  constructor() {
+    this.x = random(width);
+    this.y = random(height);
+    this.a = random(PI);
+    this.spin = random(-0.02, 0.02) * 3;
+    this.size = random(10, 25);
+    this.pointsArr = [];
+  }
 
-  this.createPoints = function () {
-    points = [];
+  createPoints() {
+    let points = [];
     for (let i = 0; i < this.size; i += random(2, 5)) {
       points.push({
         x: i,
@@ -57,33 +60,31 @@ function Flake() {
       });
     }
     return points;
-  };
+  }
 
-  this.pointsArr = this.createPoints();
-
-  this.update = function () {
+  update() {
     if (this.y > height) {
       this.y = random(-50, -10);
     }
     this.y += this.size / 30;
-  };
+  }
 
-  this.draw = function () {
+  draw() {
     push();
-    translate(this.x, this.y);
-    rotate(this.a + this.spin);
-    for (let i = 0; i < 6; i++) {
-      for (let j = 0; j < this.pointsArr.length; j++) {
-        this.pointsArr[j].c.setAlpha(
-          random(this.pointsArr[j].s, this.pointsArr[j].s * 65)
-        );
-        stroke(this.pointsArr[j].c);
-        strokeWeight(this.pointsArr[j].s);
-        point(this.pointsArr[j].x, this.pointsArr[j].y);
+      translate(this.x, this.y);
+      rotate(this.a + this.spin);
+      for (let i = 0; i < 6; i++) {
+        for (let j = 0; j < this.pointsArr.length; j++) {
+          this.pointsArr[j].c.setAlpha(
+            random(this.pointsArr[j].s, this.pointsArr[j].s * 65)
+          );
+          stroke(this.pointsArr[j].c);
+          strokeWeight(this.pointsArr[j].s);
+          point(this.pointsArr[j].x, this.pointsArr[j].y);
+        }
+        rotate(PI / 3);
       }
-      rotate(PI / 3);
-    }
     pop();
     this.a += this.spin;
-  };
+  }
 }
