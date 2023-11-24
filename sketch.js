@@ -7,7 +7,8 @@ let flakes = [],
   loopSpeed = 3,
   newSetUp = false,
   pauseDuration = 60,
-  dropSpeed = 0.3;
+  dropSpeed = 0.3,
+  sampleScale = 0.2;
 
 function preload() {
   font = loadFont("fonts/Pacifico-Regular.ttf");
@@ -15,6 +16,7 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth - 10, windowHeight - 10);
+  sampleScale = map(width, 1000, 500, 0.2, 0.5, true);
   noStroke();
   textArr = setUpText();
   flakes = makeFlakes();
@@ -57,17 +59,17 @@ class Flake {
     this.y = random(height);
     this.a = random(PI);
     this.spin = random(-0.02, 0.02) * 3;
-    this.size = random(10, 25);
+    this.size = random(width/100, width/30);
     this.pointsArr = [];
   }
 
   createPoints() {
     let points = [];
-    for (let i = 0; i < this.size; i += random(2, 5)) {
+    for (let i = 0; i < this.size; i += random(width/500, width/150)) {
       points.push({
         x: i,
         y: 0,
-        s: random(0, 4),
+        s: random(0, 1+ width/500),
         c: color(random(200, 255), random(200, 255), 255, 120),
       });
     }
@@ -113,7 +115,7 @@ function makeFlakes() {
 
 function drawPoints(loopPos, points) {
   for (let i = 0; i < loopPos; i++) {
-    strokeWeight(random(1, 5));
+    strokeWeight(random(width * 0.0003, width * 0.003));
     point(points[i].x, points[i].y);
   }
 }
@@ -149,8 +151,8 @@ function setUpText() {
     textSize(wordsSize);
     while (textWidth(words) + width * 0.2 <= width) {
       textSize(wordsSize++);
-      if (wordsSize >= height * .8) {
-        break
+      if (wordsSize >= height * 0.8) {
+        break;
       }
     }
     let offset = width - textWidth(words);
@@ -160,7 +162,7 @@ function setUpText() {
       height / 2 + wordsSize / 3,
       wordsSize,
       {
-        sampleFactor: 0.15,
+        sampleFactor: sampleScale,
       }
     );
     textArr.forEach((el) => {
