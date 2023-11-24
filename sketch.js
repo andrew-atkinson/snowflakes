@@ -2,12 +2,12 @@ let flakes = [],
   font,
   textArr,
   dropIndexCounter = 0,
-  dropFreq = 15,
+  dropFreq = 20,
   loopPos = 1,
-  loopSpeed = 3,
+  loopSpeed,
   newSetUp = false,
-  pauseDuration = 60,
-  dropSpeed = 0.3,
+  pauseDuration = 90,
+  dropSpeed = 0.4,
   sampleScale = 0.2;
 
 function preload() {
@@ -19,6 +19,7 @@ function setup() {
   sampleScale = map(width, 1000, 500, 0.2, 0.5, true);
   noStroke();
   textArr = setUpText();
+  loopSpeed = textArr.length/200;
   flakes = makeFlakes();
 }
 
@@ -122,17 +123,13 @@ function drawPoints(loopPos, points) {
 
 function fallPoints(points, dropIndexCounter) {
   let restart = true;
-  let minY = height;
   points.forEach((p) => {
-    if (p.y < height) {
+    if (p.y < height + 100) {
       restart = false;
     }
     if (dropIndexCounter > p.dropIndex) {
       p.speed += dropSpeed;
       p.y += p.speed;
-    }
-    if (p.y < minY) {
-      minY = p.y;
     }
   });
   drawPoints(textArr.length, points);
