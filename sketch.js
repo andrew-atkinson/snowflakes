@@ -1,9 +1,7 @@
 let flakes = [],
   font,
   textArr,
-  words,
   dropIndexCounter = 0,
-  loopBeginning = 1,
   dropFreq = 15,
   loopPos = 1,
   loopSpeed = 3,
@@ -41,7 +39,7 @@ function draw() {
     } else {
       // start the loop again and reset variables
       textArr = setUpText();
-      loopPos = 0;
+      loopPos = 1;
       dropIndexCounter = 0;
       newSetUp = false;
     }
@@ -143,11 +141,10 @@ function fallPoints(points, dropIndexCounter) {
 
 function setUpText() {
   let textArr = ["what?"];
-  loopPos = 1;
   let str = getURLParams();
   if (str.name) {
     let wordsSize = 1;
-    words = str.name.replace(/%20/g, " ");
+    let words = str.name.replace(/%20/g, " ");
     textAlign(CENTER, CENTER);
     textSize(wordsSize);
     while (textWidth(words) + width * 0.2 <= width) {
