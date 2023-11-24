@@ -1,0 +1,27 @@
+{
+  "name": "snowflakes",
+  "version": "1.0.0",
+  "description": "little holiday card project",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andrew-atkinson/snowflakes.git"
+  },
+  "author": "andrew atkinson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/andrew-atkinson/snowflakes/issues"
+  },
+  "homepage": "https://github.com/andrew-atkinson/snowflakes#readme",
+  "devDependencies": {
+    "eslint": "^8.54.0",
+    "eslint-config-node": "^4.1.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "prettier": "^3.1.0"
+  }
+}
