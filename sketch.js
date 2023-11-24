@@ -149,6 +149,9 @@ function setUpText() {
     textSize(wordsSize);
     while (textWidth(words) + width * 0.2 <= width) {
       textSize(wordsSize++);
+      if (wordsSize >= height * .8) {
+        break
+      }
     }
     let offset = width - textWidth(words);
     textArr = font.textToPoints(
