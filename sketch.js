@@ -1,6 +1,7 @@
 let flakes = [],
   font,
   textArr,
+  numFlakes = 300,
   dropIndexCounter = 0,
   dropFreq = 20,
   loopPos = 1,
@@ -15,16 +16,16 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(windowWidth - 10, windowHeight - 10);
+  createCanvas(windowWidth, windowHeight);
   sampleScale = map(width, 1000, 500, 0.2, 0.5, true);
   noStroke();
   textArr = setUpText();
   loopSpeed = textArr.length/200;
-  flakes = makeFlakes();
+  flakes = makeFlakes(numFlakes);
 }
 
 function draw() {
-  background(20);
+  background(15, 15, 25);
   stroke(255);
   strokeWeight(1);
   loopPos += loopSpeed;
@@ -104,9 +105,9 @@ class Flake {
   }
 }
 
-function makeFlakes() {
+function makeFlakes(num) {
   let arr = [];
-  for (let i = 0; i < 180; i++) {
+  for (let i = 0; i < num; i++) {
     let flake = new Flake();
     flake.pointsArr = flake.createPoints();
     arr.push(flake);
@@ -141,9 +142,9 @@ function fallPoints(points, dropIndexCounter) {
 function setUpText() {
   let textArr = ["what?"];
   let str = getURLParams();
-  if (str.name) {
+  if (str.message) {
     let wordsSize = 1;
-    let words = str.name.replace(/%20/g, " ");
+    let words = decodeURIComponent(str.message);
     textAlign(CENTER, CENTER);
     textSize(wordsSize);
     while (textWidth(words) + width * 0.2 <= width) {
