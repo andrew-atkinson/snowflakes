@@ -17,11 +17,7 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  sampleScale = map(width, 1000, 500, 0.2, 0.5, true);
-  noStroke();
-  textArr = setUpText();
-  loopSpeed = textArr.length/200;
-  flakes = makeFlakes(numFlakes);
+  setUpSketch();
 }
 
 function draw() {
@@ -55,23 +51,36 @@ function draw() {
   }
 }
 
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  setUpSketch();
+}
+
+function setUpSketch() {
+  sampleScale = map(width, 1000, 500, 0.2, 0.5, true);
+  noStroke();
+  textArr = setUpText();
+  loopSpeed = textArr.length / 200;
+  flakes = makeFlakes(numFlakes);
+}
+
 class Flake {
   constructor() {
     this.x = random(width);
     this.y = random(height);
     this.a = random(PI);
     this.spin = random(-0.02, 0.02) * 3;
-    this.size = random(width/100, width/30);
+    this.size = random(Math.sqrt(width * height / 2000), Math.sqrt(width * height / 500));
     this.pointsArr = [];
   }
 
   createPoints() {
     let points = [];
-    for (let i = 0; i < this.size; i += random(width/500, width/150)) {
+    for (let i = 0; i < this.size; i += random(width / 500, width / 150)) {
       points.push({
         x: i,
         y: 0,
-        s: random(0, 1+ width/500),
+        s: random(0, 1 + Math.sqrt(width / 300)),
         c: color(random(200, 255), random(200, 255), 255, 120),
       });
     }
@@ -170,3 +179,5 @@ function setUpText() {
   }
   return textArr;
 }
+
+
