@@ -149,7 +149,7 @@ function fallPoints(points, dropIndexCounter) {
 }
 
 function setUpText() {
-  let textArr = ["what?"];
+  let textArr = [];
   let str = getURLParams();
   if (str.message) {
     let wordsSize = 1;
