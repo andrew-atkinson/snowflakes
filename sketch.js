@@ -1,4 +1,7 @@
 let flakes = [],
+  fr = 0,
+  frameRateCalc = false,
+  frameRateFactor = 1,
   font,
   textArr,
   numFlakes = 300,
@@ -9,7 +12,8 @@ let flakes = [],
   pauseDuration = 90,
   dropSpeed = 0.4,
   sampleScale = 0.2,
-  lines = [];
+  lines = [],
+  evalFrames = 5;
 
 function preload() {
   font = loadFont("fonts/Pacifico-Regular.ttf");
@@ -24,7 +28,7 @@ function draw() {
   background(15, 15, 25);
   stroke(255);
   strokeWeight(1);
-  if (lines) {
+  if (frameCount > 30 && lines) {
     lines.forEach((line) => {
       line.update();
     });
@@ -36,6 +40,14 @@ function draw() {
   }
 
   loopPos += loopSpeed;
+  if (frameCount <= evalFrames) {
+    fr += frameRate()
+  } else if (!frameRateCalc) {
+    frameRateFactor = min((fr / evalFrames) / 30, 60);
+    frameRateCalc = true;
+    numFlakes = numFlakes * frameRateFactor;
+    setUpSketch();
+  }
 }
 
 function windowResized() {
@@ -44,7 +56,7 @@ function windowResized() {
 }
 
 function setUpSketch() {
-  lines=[];
+  lines = [];
   sampleScale = map(width, 1000, 500, 0.2, 0.5, true);
   noStroke();
   let params = getURLParams();
@@ -105,7 +117,7 @@ function setUpSketch() {
   }, 1);
 
   loopSpeed = floor(longestLine / 200);
-  flakes = makeFlakes(numFlakes);
+  flakes = makeFlakes(floor(numFlakes * frameRateFactor));
 }
 
 class Flake {
@@ -201,7 +213,7 @@ class Words {
       this.y,
       this.wordsSize,
       {
-        sampleFactor: sampleScale,
+        sampleFactor: sampleScale * frameRateFactor,
       }
     );
     this.textArr.forEach((el) => {
