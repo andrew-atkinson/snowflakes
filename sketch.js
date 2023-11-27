@@ -44,6 +44,7 @@ function windowResized() {
 }
 
 function setUpSketch() {
+  lines=[];
   sampleScale = map(width, 1000, 500, 0.2, 0.5, true);
   noStroke();
   let params = getURLParams();
