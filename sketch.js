@@ -6,10 +6,10 @@ let flakes = [],
   dropFreq = 20,
   loopPos = 1,
   loopSpeed,
-  newSetUp = false,
   pauseDuration = 90,
   dropSpeed = 0.4,
-  sampleScale = 0.2;
+  sampleScale = 0.2,
+  lines = [];
 
 function preload() {
   font = loadFont("fonts/Pacifico-Regular.ttf");
@@ -24,31 +24,18 @@ function draw() {
   background(15, 15, 25);
   stroke(255);
   strokeWeight(1);
-  loopPos += loopSpeed;
-  if (textArr) {
-    if (loopPos <= textArr.length) {
-      // draw the text
-      drawPoints(loopPos, textArr);
-    } else if (loopPos < textArr.length + pauseDuration) {
-      // 'pause' with the text drawn
-      drawPoints(textArr.length, textArr);
-    } else if (loopPos >= textArr.length + pauseDuration && !newSetUp) {
-      // draw the points falling
-      fallPoints(textArr, dropIndexCounter);
-      dropIndexCounter += dropFreq;
-    } else {
-      // start the loop again and reset variables
-      textArr = setUpText();
-      loopPos = 1;
-      dropIndexCounter = 0;
-      newSetUp = false;
-    }
+  if (lines) {
+    lines.forEach((line) => {
+      line.update();
+    });
   }
 
   for (let i = 0; i < flakes.length; i++) {
     flakes[i].update();
     flakes[i].draw();
   }
+
+  loopPos += loopSpeed;
 }
 
 function windowResized() {
@@ -59,8 +46,64 @@ function windowResized() {
 function setUpSketch() {
   sampleScale = map(width, 1000, 500, 0.2, 0.5, true);
   noStroke();
-  textArr = setUpText();
-  loopSpeed = textArr.length / 200;
+  let params = getURLParams();
+  let numLines = 0;
+  if (params.to) {
+    numLines++;
+  }
+  if (params.message) {
+    numLines++;
+  }
+  if (params.from) {
+    numLines++;
+  }
+
+  let maxHeight = height / numLines;
+  let previousY = 0;
+  if (params.to) {
+    let words = new Words(
+      params.to,
+      previousY + maxHeight * 0.66,
+      loopPos,
+      maxHeight,
+      pauseDuration
+    );
+    words.setUpWords();
+    lines.push(words);
+    previousY += maxHeight;
+  }
+  if (params.message) {
+    let words = new Words(
+      params.message,
+      previousY + maxHeight * 0.66,
+      loopPos,
+      maxHeight,
+      pauseDuration
+    );
+    words.setUpWords();
+    lines.push(words);
+    previousY += maxHeight;
+  }
+  if (params.from) {
+    let words = new Words(
+      params.from,
+      previousY + maxHeight * 0.66,
+      loopPos,
+      maxHeight,
+      pauseDuration
+    );
+    words.setUpWords();
+    lines.push(words);
+  }
+
+  let longestLine = lines.reduce((acc, curr) => {
+    if (curr.textArr.length > acc) {
+      return curr.textArr.length;
+    }
+    return acc;
+  }, 1);
+
+  loopSpeed = floor(longestLine / 200);
   flakes = makeFlakes(numFlakes);
 }
 
@@ -70,7 +113,10 @@ class Flake {
     this.y = random(height);
     this.a = random(PI);
     this.spin = random(-0.02, 0.02) * 3;
-    this.size = random(Math.sqrt(width * height / 2000), Math.sqrt(width * height / 500));
+    this.size = random(
+      Math.sqrt((width * height) / 2000),
+      Math.sqrt((width * height) / 500)
+    );
     this.pointsArr = [];
   }
 
@@ -124,60 +170,91 @@ function makeFlakes(num) {
   return arr;
 }
 
-function drawPoints(loopPos, points) {
-  for (let i = 0; i < loopPos; i++) {
-    strokeWeight(random(width * 0.0003, width * 0.003));
-    point(points[i].x, points[i].y);
+class Words {
+  constructor(message, y, loopPos, maxHeight, pauseDuration) {
+    this.message = decodeURIComponent(message);
+    this.y = y;
+    this.textArr = [];
+    this.wordsSize = 1;
+    this.offset = 0;
+    this.maxHeight = maxHeight;
+    this.loopPos = loopPos;
+    this.newSetUp = false;
+    this.pauseDuration = pauseDuration;
+    this.dropIndexCounter = 0;
   }
-}
 
-function fallPoints(points, dropIndexCounter) {
-  let restart = true;
-  points.forEach((p) => {
-    if (p.y < height + 100) {
-      restart = false;
-    }
-    if (dropIndexCounter > p.dropIndex) {
-      p.speed += dropSpeed;
-      p.y += p.speed;
-    }
-  });
-  drawPoints(textArr.length, points);
-  if (restart) {
-    newSetUp = true;
-  }
-}
-
-function setUpText() {
-  let textArr = [];
-  let str = getURLParams();
-  if (str.message) {
-    let wordsSize = 1;
-    let words = decodeURIComponent(str.message);
+  setUpWords() {
     textAlign(CENTER, CENTER);
-    textSize(wordsSize);
-    while (textWidth(words) + width * 0.2 <= width) {
-      textSize(wordsSize++);
-      if (wordsSize >= height * 0.8) {
+    textSize(this.wordsSize);
+    while (textWidth(this.message) + width * 0.2 <= width) {
+      textSize(this.wordsSize++);
+      if (this.wordsSize >= this.maxHeight) {
         break;
       }
     }
-    let offset = width - textWidth(words);
-    textArr = font.textToPoints(
-      words,
-      offset / 2,
-      height / 2 + wordsSize / 3,
-      wordsSize,
+    this.offset = width - textWidth(this.message);
+    this.textArr = font.textToPoints(
+      this.message,
+      this.offset / 2,
+      this.y,
+      this.wordsSize,
       {
         sampleFactor: sampleScale,
       }
     );
-    textArr.forEach((el) => {
-      el.dropIndex = floor(random(textArr.length));
+    this.textArr.forEach((el) => {
+      el.dropIndex = floor(random(this.textArr.length));
       el.speed = 1;
     });
   }
-  return textArr;
+
+  drawPoints(length) {
+    for (let i = 0; i < length; i++) {
+      strokeWeight(random(width * 0.0003, width * 0.003));
+      point(this.textArr[i].x, this.textArr[i].y);
+    }
+  }
+
+  fallPoints(dropIndexCounter) {
+    let restart = true;
+    this.textArr.forEach((p) => {
+      if (p.y < height + 100) {
+        restart = false;
+      }
+      if (dropIndexCounter > p.dropIndex) {
+        p.speed += dropSpeed;
+        p.y += p.speed;
+      }
+    });
+    this.drawPoints(this.textArr.length);
+    if (restart) {
+      this.newSetUp = true;
+    }
+  }
+
+  update() {
+    if (this.loopPos <= this.textArr.length) {
+      // draw the text
+      this.drawPoints(this.loopPos);
+      console.log("in 1st conditional");
+    } else if (this.loopPos < this.textArr.length + this.pauseDuration) {
+      // 'pause' with the text drawn
+      this.drawPoints(this.textArr.length);
+    } else if (
+      this.loopPos >= this.textArr.length + this.pauseDuration &&
+      !this.newSetUp
+    ) {
+      // draw the points falling
+      this.fallPoints(this.dropIndexCounter);
+      this.dropIndexCounter += dropFreq;
+    } else {
+      // start the loop again and reset variables
+      this.setUpWords();
+      this.loopPos = 1;
+      this.dropIndexCounter = 0;
+      this.newSetUp = false;
+    }
+    this.loopPos += loopSpeed;
+  }
 }
-
-
