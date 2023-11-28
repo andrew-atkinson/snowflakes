@@ -41,12 +41,14 @@ function draw() {
 
   loopPos += loopSpeed;
   if (frameCount <= evalFrames) {
-    fr += frameRate()
+    fr += frameRate();
   } else if (!frameRateCalc) {
-    frameRateFactor = min((fr / evalFrames) / 30, 60);
+    frameRateFactor = min(fr / evalFrames / 30, 1);
     frameRateCalc = true;
     numFlakes = numFlakes * frameRateFactor;
-    setUpSketch();
+    if (frameRateFactor < 1) {
+      setUpSketch();
+    }
   }
 }
 
@@ -73,12 +75,14 @@ function setUpSketch() {
 
   let maxHeight = height / numLines;
   let previousY = 0;
+  let delay = 0;
   if (params.to) {
     let words = new Words(
       params.to,
       previousY + maxHeight * 0.66,
       loopPos,
       maxHeight,
+      delay,
       pauseDuration
     );
     words.setUpWords();
@@ -86,11 +90,13 @@ function setUpSketch() {
     previousY += maxHeight;
   }
   if (params.message) {
+    delay += 60;
     let words = new Words(
       params.message,
       previousY + maxHeight * 0.66,
       loopPos,
       maxHeight,
+      delay,
       pauseDuration
     );
     words.setUpWords();
@@ -98,11 +104,13 @@ function setUpSketch() {
     previousY += maxHeight;
   }
   if (params.from) {
+    delay += 60;
     let words = new Words(
       params.from,
       previousY + maxHeight * 0.66,
       loopPos,
       maxHeight,
+      delay,
       pauseDuration
     );
     words.setUpWords();
@@ -184,7 +192,7 @@ function makeFlakes(num) {
 }
 
 class Words {
-  constructor(message, y, loopPos, maxHeight, pauseDuration) {
+  constructor(message, y, loopPos, maxHeight, startdelay, pauseDuration) {
     this.message = decodeURIComponent(message);
     this.y = y;
     this.textArr = [];
@@ -193,6 +201,7 @@ class Words {
     this.maxHeight = maxHeight;
     this.loopPos = loopPos;
     this.newSetUp = false;
+    this.startdelay = startdelay;
     this.pauseDuration = pauseDuration;
     this.dropIndexCounter = 0;
   }
@@ -247,13 +256,17 @@ class Words {
   }
 
   update() {
-    if (this.loopPos <= this.textArr.length) {
+    if (this.startdelay <= 0 && this.loopPos <= this.textArr.length) {
       // draw the text
       this.drawPoints(this.loopPos);
-    } else if (this.loopPos < this.textArr.length + this.pauseDuration) {
+    } else if (
+      this.startdelay <= 0 &&
+      this.loopPos < this.textArr.length + this.pauseDuration
+    ) {
       // 'pause' with the text drawn
       this.drawPoints(this.textArr.length);
     } else if (
+      this.startdelay <= 0 &&
       this.loopPos >= this.textArr.length + this.pauseDuration &&
       !this.newSetUp
     ) {
@@ -268,5 +281,6 @@ class Words {
       this.newSetUp = false;
     }
     this.loopPos += loopSpeed;
+    this.startdelay--;
   }
 }
