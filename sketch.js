@@ -113,7 +113,6 @@ function setUpSketch() {
       delay,
       pauseDuration
     );
-    words.setUpWords();
     lines.push(words);
   }
 
@@ -204,6 +203,7 @@ class Words {
     this.startdelay = startdelay;
     this.pauseDuration = pauseDuration;
     this.dropIndexCounter = 0;
+    this.setUpWords();
   }
 
   setUpWords() {
