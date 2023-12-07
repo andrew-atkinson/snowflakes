@@ -13,7 +13,8 @@ let flakes = [],
   dropSpeed = 0.4,
   sampleScale = 0.2,
   lines = [],
-  evalFrames = 5;
+  evalFrames = 5, 
+  allWordsRestart;
 
 function preload() {
   font = loadFont("fonts/Pacifico-Regular.ttf");
@@ -22,24 +23,36 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   setUpSketch();
+  flakes = makeFlakes(floor(numFlakes * frameRateFactor));
 }
 
 function draw() {
   background(15, 15, 25);
   stroke(255);
   strokeWeight(1);
+
   if (frameCount > 30 && lines) {
+    allWordsRestart = true
     lines.forEach((line) => {
       line.update();
+      if (!line.newSetUp) {
+        allWordsRestart = false
+      } 
     });
+    if (allWordsRestart){
+      allWordsRestart = false
+      loopPos = 0
+      setUpSketch()
+    }
   }
 
   for (let i = 0; i < flakes.length; i++) {
     flakes[i].update();
-    flakes[i].draw();
+    flakes[i].draw(); 
   }
-
+  
   loopPos += loopSpeed;
+
   if (frameCount <= evalFrames) {
     fr += frameRate();
   } else if (!frameRateCalc) {
@@ -48,8 +61,9 @@ function draw() {
     numFlakes = numFlakes * frameRateFactor;
     if (frameRateFactor < 1) {
       setUpSketch();
+      flakes = makeFlakes(floor(numFlakes * frameRateFactor));
     }
-  }
+  }  
 }
 
 function windowResized() {
@@ -85,7 +99,6 @@ function setUpSketch() {
       delay,
       pauseDuration
     );
-    words.setUpWords();
     lines.push(words);
     previousY += maxHeight;
   }
@@ -99,7 +112,6 @@ function setUpSketch() {
       delay,
       pauseDuration
     );
-    words.setUpWords();
     lines.push(words);
     previousY += maxHeight;
   }
@@ -124,7 +136,6 @@ function setUpSketch() {
   }, 1);
 
   loopSpeed = floor(longestLine / 200);
-  flakes = makeFlakes(floor(numFlakes * frameRateFactor));
 }
 
 class Flake {
@@ -274,12 +285,9 @@ class Words {
       this.fallPoints(this.dropIndexCounter);
       this.dropIndexCounter += dropFreq;
     } else {
-      // start the loop again and reset variables
-      this.setUpWords();
       this.loopPos = 1;
-      this.dropIndexCounter = 0;
-      this.newSetUp = false;
     }
+
     this.loopPos += loopSpeed;
     this.startdelay--;
   }
