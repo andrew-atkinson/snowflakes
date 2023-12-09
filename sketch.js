@@ -37,10 +37,10 @@ function draw() {
   strokeWeight(1);
 
   if (frameCount > 30 && lines) {
+    allWordsDisplayed = true;
+    allWordsRestart = true;
     lines.forEach((line) => {
       line.update();
-      allWordsRestart = true;
-      allWordsDisplayed = true;
       if (!line.newSetUp) {
         allWordsRestart = false;
       }
@@ -285,12 +285,14 @@ class Words {
   }
 
   update() {
+    // if start delay has elapsed - start increasing the lenght of the loop
     if (this.startdelay > 0) {
       this.loopPos = 1;
     } else {
       this.loopPos += loopSpeed;
     }
 
+    // if the text is displayed, pause.
     if (this.loopPos >= this.textArr.length) {
       this.wordsDisplayedPause = true;
     }
@@ -310,9 +312,7 @@ class Words {
       this.fallPoints(this.dropIndexCounter);
       this.dropIndexCounter += dropFreq;
     }
-
-    /// add restart condition - something off. looks like when one is done all are done.
-
+    
     this.startdelay--;
   }
 }
