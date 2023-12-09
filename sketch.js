@@ -15,7 +15,9 @@ let flakes = [],
   lines = [],
   evalFrames = 5,
   allWordsRestart,
-  allWordsDisplayed;
+  allWordsDisplayed,
+  currentWidth,
+  previousWidth;
 
 function preload() {
   font = loadFont("fonts/Pacifico-Regular.ttf");
@@ -23,6 +25,8 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  currentWidth = width;
+  previousWidth = width;
   makeWords();
   flakes = makeFlakes(floor(numFlakes * frameRateFactor));
 }
@@ -35,21 +39,20 @@ function draw() {
   if (frameCount > 30 && lines) {
     lines.forEach((line) => {
       line.update();
-      allWordsRestart = true
-      allWordsDisplayed = true
+      allWordsRestart = true;
+      allWordsDisplayed = true;
       if (!line.newSetUp) {
-        allWordsRestart = false
+        allWordsRestart = false;
       }
       if (!line.wordsDisplayedPause) {
-        allWordsDisplayed = false
+        allWordsDisplayed = false;
       }
     });
     if (allWordsRestart) {
-      allWordsRestart = false
-      loopPos = 0
-      makeWords()
+      allWordsRestart = false;
+      loopPos = 0;
+      makeWords();
     }
-    
   }
 
   for (let i = 0; i < flakes.length; i++) {
@@ -70,9 +73,12 @@ function draw() {
   }
 }
 
-function windowResized(e) { 
+function windowResized(e) {
+  currentWidth = width;
   resizeCanvas(windowWidth, windowHeight);
   makeWords();
+  flakesOnWindowResize(previousWidth, currentWidth);
+  previousWidth = currentWidth;
 }
 
 function makeWords() {
@@ -205,6 +211,13 @@ function makeFlakes(num) {
   return arr;
 }
 
+function flakesOnWindowResize(previousWidth, currentWidth) {
+  let ratio = currentWidth / previousWidth;
+  for (let flake in flakes) {
+    flakes[flake].x *= ratio;
+  }
+}
+
 class Words {
   constructor(message, y, loopPos, maxHeight, startdelay, pauseDuration) {
     this.message = decodeURIComponent(message);
@@ -279,14 +292,14 @@ class Words {
     }
 
     if (this.loopPos >= this.textArr.length) {
-      this.wordsDisplayedPause = true
+      this.wordsDisplayedPause = true;
     }
-    
+
     // draw the text
     if (this.startdelay <= 0) {
       this.drawPoints(min(this.loopPos, this.textArr.length));
-    } 
-     
+    }
+
     // draw the points falling
     if (
       this.startdelay <= 0 &&
@@ -298,8 +311,8 @@ class Words {
       this.dropIndexCounter += dropFreq;
     }
 
-    /// add restart condition - something off. looks like when one is done all are done. 
-    
+    /// add restart condition - something off. looks like when one is done all are done.
+
     this.startdelay--;
   }
 }
