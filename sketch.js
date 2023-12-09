@@ -73,7 +73,15 @@ function draw() {
   }
 }
 
-function windowResized(e) {
+function windowResized() {
+  onWindowResizeOrDeviceTurn()
+}
+
+function deviceTurned(){
+  onWindowResizeOrDeviceTurn()
+}
+
+function onWindowResizeOrDeviceTurn(){
   currentWidth = width;
   resizeCanvas(windowWidth, windowHeight);
   makeWords();
