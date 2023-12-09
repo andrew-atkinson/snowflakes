@@ -13,8 +13,9 @@ let flakes = [],
   dropSpeed = 0.4,
   sampleScale = 0.2,
   lines = [],
-  evalFrames = 5, 
-  allWordsRestart;
+  evalFrames = 5,
+  allWordsRestart,
+  allWordsDisplayed;
 
 function preload() {
   font = loadFont("fonts/Pacifico-Regular.ttf");
@@ -22,7 +23,7 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  setUpSketch();
+  makeWords();
   flakes = makeFlakes(floor(numFlakes * frameRateFactor));
 }
 
@@ -32,26 +33,29 @@ function draw() {
   strokeWeight(1);
 
   if (frameCount > 30 && lines) {
-    allWordsRestart = true
     lines.forEach((line) => {
       line.update();
+      allWordsRestart = true
+      allWordsDisplayed = true
       if (!line.newSetUp) {
         allWordsRestart = false
-      } 
+      }
+      if (!line.wordsDisplayedPause) {
+        allWordsDisplayed = false
+      }
     });
-    if (allWordsRestart){
+    if (allWordsRestart) {
       allWordsRestart = false
       loopPos = 0
-      setUpSketch()
+      makeWords()
     }
+    
   }
 
   for (let i = 0; i < flakes.length; i++) {
     flakes[i].update();
-    flakes[i].draw(); 
+    flakes[i].draw();
   }
-  
-  loopPos += loopSpeed;
 
   if (frameCount <= evalFrames) {
     fr += frameRate();
@@ -60,18 +64,18 @@ function draw() {
     frameRateCalc = true;
     numFlakes = numFlakes * frameRateFactor;
     if (frameRateFactor < 1) {
-      setUpSketch();
+      makeWords();
       flakes = makeFlakes(floor(numFlakes * frameRateFactor));
     }
-  }  
+  }
 }
 
-function windowResized() {
+function windowResized(e) { 
   resizeCanvas(windowWidth, windowHeight);
-  setUpSketch();
+  makeWords();
 }
 
-function setUpSketch() {
+function makeWords() {
   lines = [];
   sampleScale = map(width, 1000, 500, 0.2, 0.5, true);
   noStroke();
@@ -213,6 +217,7 @@ class Words {
     this.newSetUp = false;
     this.startdelay = startdelay;
     this.pauseDuration = pauseDuration;
+    this.wordsDisplayedPause = false;
     this.dropIndexCounter = 0;
     this.setUpWords();
   }
@@ -267,28 +272,34 @@ class Words {
   }
 
   update() {
-    if (this.startdelay <= 0 && this.loopPos <= this.textArr.length) {
-      // draw the text
-      this.drawPoints(this.loopPos);
-    } else if (
-      this.startdelay <= 0 &&
-      this.loopPos < this.textArr.length + this.pauseDuration
-    ) {
-      // 'pause' with the text drawn
-      this.drawPoints(this.textArr.length);
-    } else if (
-      this.startdelay <= 0 &&
-      this.loopPos >= this.textArr.length + this.pauseDuration &&
-      !this.newSetUp
-    ) {
-      // draw the points falling
-      this.fallPoints(this.dropIndexCounter);
-      this.dropIndexCounter += dropFreq;
-    } else {
+    if (this.startdelay > 0) {
       this.loopPos = 1;
+    } else {
+      this.loopPos += loopSpeed;
     }
 
-    this.loopPos += loopSpeed;
+    if (this.loopPos >= this.textArr.length) {
+      this.wordsDisplayedPause = true
+    }
+    
+    // draw the text
+    if (this.startdelay <= 0) {
+      this.drawPoints(min(this.loopPos, this.textArr.length));
+    } 
+     
+    // draw the points falling
+    if (
+      this.startdelay <= 0 &&
+      this.loopPos >= this.textArr.length &&
+      !this.newSetUp &&
+      allWordsDisplayed
+    ) {
+      this.fallPoints(this.dropIndexCounter);
+      this.dropIndexCounter += dropFreq;
+    }
+
+    /// add restart condition - something off. looks like when one is done all are done. 
+    
     this.startdelay--;
   }
 }
