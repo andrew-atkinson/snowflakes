@@ -17,7 +17,9 @@ let flakes = [],
   allWordsRestart,
   allWordsDisplayed,
   currentWidth,
-  previousWidth;
+  previousWidth,
+  currentHeight,
+  previousHeight;
 
 function preload() {
   font = loadFont("fonts/Pacifico-Regular.ttf");
@@ -27,6 +29,8 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   currentWidth = width;
   previousWidth = width;
+  currentHeight = height;
+  previousHeight = height;
   makeWords();
   flakes = makeFlakes(floor(numFlakes * frameRateFactor));
 }
@@ -73,20 +77,25 @@ function draw() {
   }
 }
 
-function windowResized() {
-  onWindowResizeOrDeviceTurn()
+function windowResized(e) {
+  onWindowResizeOrDeviceTurn();
 }
 
-function deviceTurned(){
-  onWindowResizeOrDeviceTurn()
+function deviceTurned(e) {
+  onWindowResizeOrDeviceTurn();
 }
 
-function onWindowResizeOrDeviceTurn(){
-  currentWidth = width;
+function onWindowResizeOrDeviceTurn() {
   resizeCanvas(windowWidth, windowHeight);
+  flakesOnWindowResize(
+    previousWidth,
+    windowWidth,
+    previousHeight,
+    windowHeight
+  );
   makeWords();
-  flakesOnWindowResize(previousWidth, currentWidth);
-  previousWidth = currentWidth;
+  previousWidth = width;
+  previousHeight = height;
 }
 
 function makeWords() {
@@ -219,10 +228,19 @@ function makeFlakes(num) {
   return arr;
 }
 
-function flakesOnWindowResize(previousWidth, currentWidth) {
-  let ratio = currentWidth / previousWidth;
+function flakesOnWindowResize(
+  previousWidth,
+  currentWidth,
+  previousHeight,
+  currentHeight
+) {
+  let xRatio = currentWidth / previousWidth;
+  let yRatio = currentHeight / previousHeight;
   for (let flake in flakes) {
-    flakes[flake].x *= ratio;
+    let newX = flakes[flake].x * xRatio;
+    let newY = flakes[flake].y * yRatio;
+    flakes[flake].x = newX;
+    flakes[flake].y = newY;
   }
 }
 
@@ -320,7 +338,7 @@ class Words {
       this.fallPoints(this.dropIndexCounter);
       this.dropIndexCounter += dropFreq;
     }
-    
+
     this.startdelay--;
   }
 }
