@@ -187,7 +187,6 @@ class Flake {
     for (let i = 0; i < this.size; i += random(width / 500, width / 150)) {
       points.push({
         x: i,
-        y: 0,
         s: random(0, 1 + Math.sqrt(width / 300)),
         c: color(random(200, 255), random(200, 255), 255, 120),
       });
@@ -213,7 +212,7 @@ class Flake {
         );
         stroke(this.pointsArr[j].c);
         strokeWeight(this.pointsArr[j].s);
-        point(this.pointsArr[j].x, this.pointsArr[j].y);
+        point(this.pointsArr[j].x, 0);
       }
       rotate(PI / 3);
     }
