@@ -43,14 +43,18 @@ function draw() {
   if (frameCount > 30 && lines) {
     allWordsDisplayed = true;
     allWordsRestart = true;
+    // checks on restarts and if all words are displayed...
     lines.forEach((line) => {
-      line.update();
       if (!line.newSetUp) {
         allWordsRestart = false;
       }
       if (!line.wordsDisplayedPause) {
         allWordsDisplayed = false;
       }
+    });
+    // then updates accordingly
+    lines.forEach((line) => {
+      line.update();
     });
     if (allWordsRestart) {
       allWordsRestart = false;
@@ -318,14 +322,14 @@ class Words {
       this.loopPos += loopSpeed;
     }
 
-    // if the text is displayed, pause.
-    if (this.loopPos >= this.textArr.length) {
-      this.wordsDisplayedPause = true;
-    }
-
     // draw the text
     if (this.startdelay <= 0) {
       this.drawPoints(min(this.loopPos, this.textArr.length));
+    }
+
+    // if the text is displayed, pause.
+    if (this.loopPos >= this.textArr.length) {
+      this.wordsDisplayedPause = true;
     }
 
     // draw the points falling
