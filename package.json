@@ -4,7 +4,9 @@
   "description": "little holiday card project",
   "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "terser": "terser sketch.js -o sketch.min.js -c -m --keep-fnames",
+    "dev": "nodemon -w sketch.js --exec \"npm run terser\""
   },
   "repository": {
     "type": "git",
@@ -22,6 +24,8 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.0.1",
-    "prettier": "^3.1.0"
+    "nodemon": "^3.0.2",
+    "prettier": "^3.1.0",
+    "terser": "^5.26.0"
   }
 }
